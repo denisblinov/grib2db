@@ -52,8 +52,12 @@ INTEGER FUNCTION write2db(values, shortName, date, srok, zabl, factor, inc)
 
     IF (dBType == 0) THEN
         CALL wrfcRemDB(dBName, int4(dbUser), int4(date), recName, int4(srok), valuesR4, errorCode)
-    ELSE
-    	CALL wrfqRemDB(dBName, int4(dbUser), int4(date), recName, int4(srok), valuesR4, errorCode)
+    ELSE IF(dBType == 1)THEN
+        CALL wrfqRemDB(dBName, int4(dbUser), recName, int4(srok), valuesR4, errorCode)
+    ELSE IF(dBType == 2)THEN
+        CALL WrfcrRemDB(dBName, int4(dbUser), int4(date), recName, P1, P2, P3, P4, P5, valuesR4, errorCode)
+    ELSE IF(dBType == 3)THEN
+        CALL WrfqrRemDB(dBName, int4(dbUser), recName, P1, P2, P3, P4, P5, valuesR4, errorCode)
     ENDIF
     IF (errorCode /= 0) THEN
         errorMsg = dBName

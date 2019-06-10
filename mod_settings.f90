@@ -35,13 +35,16 @@ MODULE mod_settings
     CHARACTER(LEN = 1) :: hemisphere 
     INTEGER :: lonCount
     INTEGER :: latCount
+    ! Parameters of range for rows
+    INTEGER :: P1, P2, P3, P4, P5
+    LOGICAL :: addColumn4cyclicLongitude
     TYPE(FieldRec) :: fieldList(fieldCountMax)
 
 CONTAINS
 
 INTEGER FUNCTION loadSettings()
 
-    CHARACTER(LEN = 1024), PARAMETER :: filename_namelist = "./grib2db.nl"
+    CHARACTER(LEN = 1024), PARAMETER :: filename_namelist = "grib2db.nl"
 
     INTEGER :: k
 
@@ -55,7 +58,19 @@ INTEGER FUNCTION loadSettings()
         hemisphere, &
         lonCount, &
         latCount, &
-        fieldList
+        fieldList, &
+        P1, P2, P3, P4, P5, &
+        addColumn4cyclicLongitude
+
+    ! default values
+    dBType = 0
+    dBHost = '192.168.97.71'
+    P1 = 0
+    P2 = 0
+    P3 = 0
+    P4 = 0
+    P5 = 0
+    addColumn4cyclicLongitude = .FALSE.
 
     DO k = 1, fieldCountMax
         fieldList(k)%shortName = "---"
@@ -69,7 +84,7 @@ INTEGER FUNCTION loadSettings()
         loadSettings = FILE_OPEN_ERROR
         RETURN
     ENDIF
-    read(fNamelist, nml = grib2db, iostat = errorCode)
+    READ(fNamelist, nml = grib2db, iostat = errorCode)
     IF (errorCode /= 0) THEN
         errorMsg = trim(filename_namelist)
         loadSettings = FILE_READ_ERROR
@@ -86,6 +101,11 @@ INTEGER FUNCTION loadSettings()
     PRINT '("hemisphere = ", a)', trim(hemisphere)
     PRINT '("lonCount = ", i0)', lonCount
     PRINT '("latCount = ", i0)', latCount
+    PRINT '("P1 = ", i0)', P1
+    PRINT '("P2 = ", i0)', P2
+    PRINT '("P3 = ", i0)', P3
+    PRINT '("P4 = ", i0)', P4
+    PRINT '("P5 = ", i0)', P5
     PRINT '("shortName list:")'
     fieldCount = 0
     DO k = 1, fieldCountMax

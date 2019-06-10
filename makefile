@@ -1,15 +1,16 @@
 # Code by Kopeykin V.V., 2014-2015
 
-SOLUTION = grib2db.ex
+SOLUTION = grib2db.exe
 
 GRIB_API = /RHM-GPFS/users/cosmo/dblinov/software/package/grib_api/1.13.1/x86_64-intel
 JASPER = /RHM-GPFS/software/ice/local
 
 FC = ifort
+# FCFLAGS = -i4 -r8 -check bounds -Wl,--trace -extend_source -g -traceback -p
 FCFLAGS = -i4 -r8 -check bounds -Wl,--trace -extend_source
 FLFLAGS = -I$(GRIB_API)/include -I$(JASPER)/include
 
-LIB1 = ~asoihmc/LibRemDB/LibServHMC_Tornado.a
+LIB1 = ~asoihmc/LibRemDB/LibServHMC_Tornado.a ~dbexp/DataBase/FIELD/bankload.a
 LIB2 = -L$(GRIB_API)/lib -lgrib_api_f77 -lgrib_api_f90 -lgrib_api
 LIB3 = -L$(JASPER)/lib -ljasper
 LIBS = $(LIB1) $(LIB2) $(LIB3)

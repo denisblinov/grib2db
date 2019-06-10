@@ -16,25 +16,35 @@ INTEGER FUNCTION write2db(values, shortName, date, srok, zabl, factor, inc)
 
     IMPLICIT NONE
 
-    INCLUDE 'upendField.h'
+    ! INCLUDE 'upendField.h'
 
     REAL, DIMENSION(lonCount, latCount), INTENT(IN) :: values
     CHARACTER(LEN = 3), INTENT(IN) :: shortName
     INTEGER, INTENT(IN) :: date, srok, zabl
     REAL, INTENT(IN) :: factor, inc
-    REAL(4), DIMENSION(lonCount + 1, latCount) :: valuesR4
+    ! REAL(4), DIMENSION(lonCount + 1, latCount) :: valuesR4
+    REAL(4), DIMENSION(:, :), ALLOCATABLE :: valuesR4
     CHARACTER(8) :: recName
     INTEGER :: i, j
     INTEGER(4) :: recInfo(60)
 
-    valuesR4(1 : lonCount, :) = values(:, :)
-    valuesR4(lonCount + 1, :) = values(1, :)
-
-    CALL upendField(valuesR4)
+    IF( addColumn4cyclicLongitude )THEN
+        ALLOCATE( valuesR4(lonCount + 1, latCount) )
+        ! valuesR4(1 : lonCount, :) = values(:, :)
+        ! valuesR4(lonCount + 1, :) = values(1, :)
+        ! CALL upendField(valuesR4)
+        valuesR4(1 : lonCount, :) = values(:, latCount:1:-1)
+        valuesR4(lonCount + 1, :) = values(1, latCount:1:-1)
+    ELSE
+        ALLOCATE( valuesR4(lonCount, latCount) )
+        valuesR4(1 : lonCount, :) = values(:, :)
+    END IF
 
     WRITE(recName, '(a3,a1,i3.3,a1)') shortName, hemisphere, zabl, grid
 
+    ! PRINT '("get record info: ", a,i7.3)', trim(recName), zabl
     CALL getcRemDB(dBName, int4(dbUser), recName, recInfo, errorCode)
+    PRINT '("get record info: ", a, ", code = ", i0)', trim(recName), errorCode
     IF (errorCode /= 0) THEN
         errorMsg = dBName
         write2db = DB_READ_ERROR
@@ -52,9 +62,21 @@ INTEGER FUNCTION write2db(values, shortName, date, srok, zabl, factor, inc)
 
     IF (dBType == 0) THEN
         CALL wrfcRemDB(dBName, int4(dbUser), int4(date), recName, int4(srok), valuesR4, errorCode)
-    ELSE
-    	CALL wrfqRemDB(dBName, int4(dbUser), int4(date), recName, int4(srok), valuesR4, errorCode)
+    ELSE IF(dBType == 1)THEN
+        CALL wrfqRemDB(dBName, int4(dbUser), recName, int4(srok), valuesR4, errorCode)
+    ELSE IF(dBType == 2)THEN
+        CALL WrfcrRemDB(dBName, int4(dbUser), int4(date), recName, int4(srok), P1, P2, P3, P4, P5, valuesR4, errorCode)
+        ! CALL Wrfcr(dBName, int4(dbUser), int4(date), recName, int4(srok), P1, P2, P3, P4, P5, valuesR4, errorCode)
+    ELSE IF(dBType == 3)THEN
+        CALL WrfqrRemDB(dBName, int4(dbUser), recName, int4(srok), P1, P2, P3, P4, P5, valuesR4, errorCode)
+    ELSE IF(dBType == 9999)THEN ! debug_outputField
+        OPEN(11,FILE='debug_outputField.txt',status='UNKNOWN',POSITION='APPEND')
+        WRITE(11, '("date,srok,P1,recName: ",i8.8, 2i4.2, a10)') date, srok, P1, recName
+        WRITE(11, '(f12.4)') valuesR4
+        CLOSE(11)
     ENDIF
+
+    DEALLOCATE( valuesR4 )
     IF (errorCode /= 0) THEN
         errorMsg = dBName
         write2db = DB_WRITE_ERROR
@@ -62,6 +84,5 @@ INTEGER FUNCTION write2db(values, shortName, date, srok, zabl, factor, inc)
     ENDIF
 
     write2db = NO_ERROR
-    RETURN
 
 ENDFUNCTION 

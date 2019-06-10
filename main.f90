@@ -19,7 +19,6 @@ PROGRAM grib2db
 
     INTEGER :: error
     INTEGER :: gribProcessing
-    INTEGER :: gribFile
 
     PRINT '("")'
     PRINT '(">>> grib2db start!")'
@@ -49,39 +48,20 @@ PROGRAM grib2db
         errorMsg = trim(dBName)
         CALL printErrorInfo(error)
         CALL exit(error)
-    ENDIF 
-
-    ! Open grib-file
-    OPEN(gribFile, file = trim(filename_grib), status = 'old', iostat = errorCode)
-    IF (errorCode /= 0) THEN
-        error = FILE_OPEN_ERROR
-        errorMsg = trim(filename_grib)
-        CALL printErrorInfo(error)
-        CALL exit(error)
-    ENDIF
-    CLOSE(gribFile)
-    CALL grib_open_file(gribFile, filename_grib, 'r', errorCode)
-    IF (errorCode /= GRIB_SUCCESS) THEN
-    	error = FILE_OPEN_ERROR
-        errorMsg = trim(filename_grib)
-        CALL printErrorInfo(error)
-        CALL exit(error)
     ENDIF
 
     ! Copying fields from grib-file to DB
-    error = gribProcessing(gribFile)
+    error = gribProcessing()
+    PRINT '("gribProcessing, code = ", i0)', errorCode
     IF (error /= NO_ERROR) THEN
         CALL printErrorInfo(error)
         CALL exit(error)
-    ENDIF    
-
-	! Close grib-file
-    CALL grib_close_file(gribFile)
+    ENDIF
 
     ! Close host
     CALL closeRemHost(dBHost, errorCode)  
     IF (errorCode /= 0) THEN
-   	    error = HOST_CLOSE_ERROR
+        error = HOST_CLOSE_ERROR
         errorMsg = trim(dBHost)
         CALL printErrorInfo(error)
         CALL exit(error)

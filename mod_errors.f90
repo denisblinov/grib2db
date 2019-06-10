@@ -46,7 +46,7 @@ SUBROUTINE printErrorInfo(error)
         CASE(FILE_CLOSE_ERROR)
             PRINT '("File close error. Msg: ", a, ". Code = ", i0)', trim(errorMsg), errorCode
         CASE(FIELD_MISSING_ERROR)
-            PRINT '("Field missing error. Msg: ", a, ". Code = ", i0)', trim(errorMsg), errorCode
+            PRINT '("Field missing warning. Msg: ", a, ". Code = ", i0)', trim(errorMsg), errorCode
         CASE(HOST_OPEN_ERROR)
             PRINT '("Host open error. Msg: ", a, ". Code = ", i0)', trim(errorMsg), errorCode
         CASE(HOST_CLOSE_ERROR)

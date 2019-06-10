@@ -37,6 +37,7 @@ MODULE mod_settings
     INTEGER :: latCount
     ! Parameters of range for rows
     INTEGER :: P1, P2, P3, P4, P5
+    LOGICAL :: addColumn4cyclicLongitude
     TYPE(FieldRec) :: fieldList(fieldCountMax)
 
 CONTAINS
@@ -58,7 +59,8 @@ INTEGER FUNCTION loadSettings()
         lonCount, &
         latCount, &
         fieldList, &
-        P1, P2, P3, P4, P5
+        P1, P2, P3, P4, P5, &
+        addColumn4cyclicLongitude
 
     ! default values
     dBType = 0
@@ -68,6 +70,7 @@ INTEGER FUNCTION loadSettings()
     P3 = 0
     P4 = 0
     P5 = 0
+    addColumn4cyclicLongitude = .FALSE.
 
     DO k = 1, fieldCountMax
         fieldList(k)%shortName = "---"
